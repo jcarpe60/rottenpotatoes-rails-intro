@@ -19,7 +19,7 @@ class MoviesController < ApplicationController
       [Movie.all.order(params[:sort_by]), "not", "hilite"]
     else
       [Movie.all, "not", "not"]
-    end
+    end 
   end
 
   def new
