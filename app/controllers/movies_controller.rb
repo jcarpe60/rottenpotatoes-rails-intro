@@ -20,7 +20,19 @@ class MoviesController < ApplicationController
     @selected = session[:ratings]
     @sorting = session[:sort_by]
     
-    @movies, @class1, @class2 = case params[:sort_by]
+    if params[:ratings].present? && params[:sort_by].present?
+      @movies, @class1, @class2 = case params[:sort_by]
+      when "title"
+        [Movie.where(rating: params[ratings].keys).order(params[:sort_by]), "hilite", "not"]
+      when "release_date"
+        [Movie.where(rating: params[ratings].keys).order(params[:sort_by]), "not", "hilite"]
+      else
+        [Movie.all, "not", "not"]
+      end 
+    elsif params[:ratings].present? && params[:sort_by].nil?
+      @movies = Movie.where(rating: params[:ratings].keys)
+    elsif params[:ratings].nil? && params[:sort_by].present?
+      @movies, @class1, @class2 = case params[:sort_by]
       when "title"
         [Movie.all.order(params[:sort_by]), "hilite", "not"]
       when "release_date"
@@ -28,7 +40,10 @@ class MoviesController < ApplicationController
       else
         [Movie.all, "not", "not"]
       end 
-     
+    else
+      @movies = Movie.all
+    end
+
 =begin
     if @selected.present? && @sorting.present?
       @movies, @class1, @class2 = case params[:sort_by]
@@ -54,7 +69,26 @@ class MoviesController < ApplicationController
       @movies = Movie.all
     end 
 =end
-     
+    
+=begin
+    @movies, @class1, @class2 = case session[:sort_by]
+      when "title"
+        [Movie.all.order(session[:sort_by]), "hilite", "not"]
+      when "release_date"
+        [Movie.all.order(session[:sort_by]), "not", "hilite"]
+      else
+        [Movie.all, "not", "not"]
+      end
+=end
+  end
+    
+  def hilight(column)
+    if(session[:sort_by].to_s == column)
+      return hilite
+    else
+      return nil
+    end
+  end
     
 =begin
     if params[:ratings].present?
@@ -88,8 +122,6 @@ class MoviesController < ApplicationController
       @movies = Movie.all
     end
 =end
-
-  end
 
   def new
     # default: render 'new' template
