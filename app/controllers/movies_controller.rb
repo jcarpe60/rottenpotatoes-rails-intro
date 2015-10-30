@@ -19,7 +19,17 @@ class MoviesController < ApplicationController
     
     @selected = session[:ratings]
     @sorting = session[:sort_by]
+    
+    @movies, @class1, @class2 = case params[:sort_by]
+      when "title"
+        [Movie.all.order(params[:sort_by]), "hilite", "not"]
+      when "release_date"
+        [Movie.all.order(params[:sort_by]), "not", "hilite"]
+      else
+        [Movie.all, "not", "not"]
+      end 
      
+=begin
     if @selected.present? && @sorting.present?
       @movies, @class1, @class2 = case params[:sort_by]
       when "title"
@@ -43,6 +53,7 @@ class MoviesController < ApplicationController
     else
       @movies = Movie.all
     end 
+=end
      
     
 =begin
