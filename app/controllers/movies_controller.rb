@@ -25,9 +25,12 @@ class MoviesController < ApplicationController
     @selected = session[:ratings]
     @sorting = session[:sort_by]
     
-    if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:order].nil? && !session[:order].nil?)
-      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
-    elsif @selected.present? && @sorting.present?
+    #if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:order].nil? && !session[:order].nil?)
+      #redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
+    #elsif !session[:ratings].nil? || !session[:order].nil?
+      #redirect_to movies_path("ratings" => session[:ratings], "order" => session[:sort_by])
+    
+    if @selected.present? && @sorting.present?
       @movies, @class1, @class2 = case params[:sort_by]
       when "title"
         [Movie.where(rating: @selected.keys).order(@sorting), "hilite", "not"]
@@ -47,8 +50,6 @@ class MoviesController < ApplicationController
       else
         [Movie.all, "not", "not"]
       end 
-    elsif !session[:ratings].nil? || !session[:order].nil?
-      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:sort_by])
     else
       @movies = Movie.all
     end
