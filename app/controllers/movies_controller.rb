@@ -1,5 +1,6 @@
 class MoviesController < ApplicationController
   helper_method :chosen_rating?
+  helper_method :hilight
 
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
@@ -12,12 +13,7 @@ class MoviesController < ApplicationController
     @movie = Movie.find(id) # look up movie by unique ID
     # will render app/views/movies/show.<extension> by default
   end
-  
-  def chosen_rating?(rating)
-    chosen_ratings = session[:ratings]
-    return true if chosen_ratings.nil?
-    chosen_ratings.include? rating
-  end
+
   
   def index
     @all_ratings = Movie.all_ratings
@@ -29,7 +25,9 @@ class MoviesController < ApplicationController
     @selected = session[:ratings]
     @sorting = session[:sort_by]
     
-    if @selected.present? && @sorting.present?
+    if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:order].nil? && !session[:order].nil?)
+      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
+    elsif @selected.present? && @sorting.present?
       @movies, @class1, @class2 = case params[:sort_by]
       when "title"
         [Movie.where(rating: @selected.keys).order(@sorting), "hilite", "not"]
@@ -54,78 +52,20 @@ class MoviesController < ApplicationController
     else
       @movies = Movie.all
     end
-    
-    
-=begin
-    if params[:ratings].present? && params[:sort_by].present?
-      @movies, @class1, @class2 = case params[:sort_by]
-      when "title"
-        [Movie.where(rating: params[ratings].keys).order(params[:sort_by]), "hilite", "not"]
-      when "release_date"
-        [Movie.where(rating: params[ratings].keys).order(params[:sort_by]), "not", "hilite"]
-      else
-        [Movie.all, "not", "not"]
-      end 
-    elsif params[:ratings].present? && params[:sort_by].nil?
-      @movies = Movie.where(rating: params[:ratings].keys)
-    elsif params[:ratings].nil? && params[:sort_by].present?
-      @movies, @class1, @class2 = case params[:sort_by]
-      when "title"
-        [Movie.all.order(params[:sort_by]), "hilite", "not"]
-      when "release_date"
-        [Movie.all.order(params[:sort_by]), "not", "hilite"]
-      else
-        [Movie.all, "not", "not"]
-      end 
-    else
-      @movies = Movie.all
-    end
-=end
-
-=begin
-    if @selected.present? && @sorting.present?
-      @movies, @class1, @class2 = case params[:sort_by]
-      when "title"
-        [Movie.where(rating: @selected.keys).order(@sorting), "hilite", "not"]
-      when "release_date"
-        [Movie.where(rating: @selected.keys).order(@sorting), "not", "hilite"]
-      else
-        [Movie.all, "not", "not"]
-      end 
-    elsif @selected.present? && @sorting.nil?
-      @movies = Movie.where(rating: @selected.keys)
-    elsif @selected.nil? && @sorting.present?
-      @movies, @class1, @class2 = case @sorting
-      when "title"
-        [Movie.all.order(@sorting), "hilite", "not"]
-      when "release_date"
-        [Movie.all.order(@sorting), "not", "hilite"]
-      else
-        [Movie.all, "not", "not"]
-      end 
-    else
-      @movies = Movie.all
-    end 
-=end
-    
-=begin
-    @movies, @class1, @class2 = case session[:sort_by]
-      when "title"
-        [Movie.all.order(session[:sort_by]), "hilite", "not"]
-      when "release_date"
-        [Movie.all.order(session[:sort_by]), "not", "hilite"]
-      else
-        [Movie.all, "not", "not"]
-      end
-=end
   end
     
   def hilight(column)
     if(session[:sort_by].to_s == column)
-      return hilite
+      return 'hilite'
     else
       return nil
     end
+  end
+  
+  def chosen_rating?(rating)
+    chosen_ratings = session[:ratings]
+    return true if chosen_ratings.nil?
+    chosen_ratings.include? rating
   end
     
 =begin
