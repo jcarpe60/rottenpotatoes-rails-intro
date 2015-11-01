@@ -25,13 +25,23 @@ class MoviesController < ApplicationController
     @selected = session[:ratings]
     @sorting = session[:sort_by]
     
-    #if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:order].nil? && !session[:order].nil?)
-      #redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
-    #elsif !session[:ratings].nil? || !session[:order].nil?
-      #redirect_to movies_path("ratings" => session[:ratings], "order" => session[:sort_by])
+    #if (params[:ratings].nil? && @selected.present?) || (params[:sort_by].nil? && @sorting.present?)
+      #redirect_to movies_path("ratings" => @selected, "order" => @sorting)
+    if params[:ratings].present? || params[:sort_by].present?
+      if params[:ratings].present?
+        return @movies = Movie.where(rating: params[:ratings].keys).order(@sorting)
+      else
+        return @movies = Movie.all.order(@sorting)
+      end
+    elsif @selected.present? || @sorting.present?
+      redirect_to movies_path("ratings" => @selected, "order" => @sorting)
+    else
+      return @movies = Movie.all
+    end
+  end
     
-    if @selected.present? && @sorting.present?
-      @movies, @class1, @class2 = case params[:sort_by]
+=begin
+@movies, @class1, @class2 = case params[:sort_by]
       when "title"
         [Movie.where(rating: @selected.keys).order(@sorting), "hilite", "not"]
       when "release_date"
@@ -50,10 +60,7 @@ class MoviesController < ApplicationController
       else
         [Movie.all, "not", "not"]
       end 
-    else
-      @movies = Movie.all
-    end
-  end
+=end
     
   def highlight(column)
     if(session[:sort_by].to_s == column)
@@ -69,39 +76,6 @@ class MoviesController < ApplicationController
     chosen_ratings.include? rating
   end
     
-=begin
-    if params[:ratings].present?
-      @movies = Movie.where(rating: params[:ratings].keys)
-    else
-      @movies = Movie.all
-    end
-=end
-=begin
-    if params[:ratings].present? && params[:sort_by].present?
-      @movies, @class1, @class2 = case params[:sort_by]
-      when "title"
-        [Movie.where(rating: params[ratings].keys).order(params[:sort_by]), "hilite", "not"]
-      when "release_date"
-        [Movie.where(rating: params[ratings].keys).order(params[:sort_by]), "not", "hilite"]
-      else
-        [Movie.all, "not", "not"]
-      end 
-    elsif params[:ratings].present? && params[:sort_by].nil?
-      @movies = Movie.where(rating: params[:ratings].keys)
-    elsif params[:ratings].nil? && params[:sort_by].present?
-      @movies, @class1, @class2 = case params[:sort_by]
-      when "title"
-        [Movie.all.order(params[:sort_by]), "hilite", "not"]
-      when "release_date"
-        [Movie.all.order(params[:sort_by]), "not", "hilite"]
-      else
-        [Movie.all, "not", "not"]
-      end 
-    else
-      @movies = Movie.all
-    end
-=end
-
   def new
     # default: render 'new' template
   end
