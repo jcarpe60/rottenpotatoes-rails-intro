@@ -29,7 +29,7 @@ class MoviesController < ApplicationController
       #redirect_to movies_path("ratings" => @selected, "order" => @sorting)
     if params[:ratings].present? || params[:sort_by].present?
       if params[:ratings].present?
-        return @movies = Movie.where(rating: params[:ratings].keys).order(@sorting)
+        return @movies = Movie.where(rating: @selected.keys).order(@sorting)
       else
         return @movies = Movie.all.order(@sorting)
       end
