@@ -1,5 +1,5 @@
 class MoviesController < ApplicationController
-  helper_method :chosen_rating?
+  helper_method :selectedRating?
   helper_method :highlight
 
   def movie_params
@@ -25,20 +25,42 @@ class MoviesController < ApplicationController
     @selected = session[:ratings]
     @sorting = session[:sort_by]
     
-    #if (params[:ratings].nil? && @selected.present?) || (params[:sort_by].nil? && @sorting.present?)
-      #redirect_to movies_path("ratings" => @selected, "order" => @sorting)
-    if params[:ratings].present? || params[:sort_by].present?
-      if params[:ratings].present?
-        return @movies = Movie.where(rating: @selected.keys).order(@sorting)
+=begin
+    if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:order].nil? && !session[:order].nil?)
+      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
+    elsif !params[:ratings].nil? || !params[:order].nil?
+      if !params[:ratings].nil?
+        array_ratings = params[:ratings].keys
+        return @movies = Movie.where(rating: array_ratings).order(session[:order])
       else
-        return @movies = Movie.all.order(@sorting)
+        return @movies = Movie.all.order(session[:order])
       end
-    elsif @selected.present? || @sorting.present?
-      redirect_to movies_path("ratings" => @selected, "order" => @sorting)
+    elsif !session[:ratings].nil? || !session[:order].nil?
+      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
     else
       return @movies = Movie.all
     end
+=end
+    
+    #if (params[:ratings].nil? && @selected.present?) || (params[:sort_by].nil? && @sorting.present?)
+      #redirect_to movies_path("ratings" => @selected, "order" => @sorting)
+
+    #if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:sort_by].nil? && !session[:sort_by].nil?)
+      #redirect_to movies_path("ratings" => session[:ratings], "order" => session[:sort_by])
+    if !params[:ratings].nil? || !params[:sort_by].nil?
+      if !params[:ratings].nil?
+        return @movies = Movie.where(rating: params[:ratings].keys).order(session[:sort_by])
+      else
+        return @movies = Movie.all.order(session[:sorty_by])
+      end
+    elsif !session[:ratings].nil? || !session[:sort_by].nil?
+      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:sort_by])
+    else
+      return @movies = Movie.all
+    end
+    
   end
+
     
 =begin
 @movies, @class1, @class2 = case params[:sort_by]
@@ -70,10 +92,10 @@ class MoviesController < ApplicationController
     end
   end
   
-  def chosen_rating?(rating)
-    chosen_ratings = session[:ratings]
-    return true if chosen_ratings.nil?
-    chosen_ratings.include? rating
+  def selectedRating?(rating)
+    selectedRatings = session[:ratings]
+    return true if selectedRatings.nil?
+    selectedRatings.include? rating
   end
     
   def new
