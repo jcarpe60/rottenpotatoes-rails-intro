@@ -19,34 +19,29 @@ class MoviesController < ApplicationController
     session[:ratings] = params[:ratings] unless params[:ratings].nil?
     session[:sort_by] = params[:sort_by] unless params[:sort_by].nil?
 
-    if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:sort_by].nil? && !session[:sort_by].nil?)
+    if (params[:ratings].nil? && session[:ratings].present?) || (params[:sort_by].nil? && session[:sort_by].present?)
       redirect_to movies_path("ratings" => session[:ratings], "sort_by" => session[:sort_by])
-    elsif !params[:ratings].nil? || !params[:sort_by].nil?
-      if !params[:ratings].nil?
+    elsif params[:ratings].present? || params[:sort_by].present?
+      if params[:ratings].present?
         @movies = Movie.where(rating: params[:ratings].keys).order(session[:sort_by])
       else
         @movies = Movie.all.order(session[:sorty_by])
       end
-    elsif !session[:ratings].nil? || !session[:sort_by].nil?
+    elsif session[:ratings].present? || session[:sort_by].present?
       redirect_to movies_path("ratings" => session[:ratings], "sort_by" => session[:sort_by])
     else
       @movies = Movie.all
     end
-    
+
   end
     
   def highlight(column)
-    if(session[:sort_by].to_s == column)
-      return 'hilite'
-    else
-      return nil
-    end
+    (session[:sort_by].to_s == column) ? 'hilite' : nil
   end
   
   def selectedRating?(rating)
     selectedRatings = session[:ratings]
-    return true if selectedRatings.nil?
-    selectedRatings.include? rating
+    (selectedRatings.nil?) ? true : selectedRatings.include?(rating)
   end
     
   def new
